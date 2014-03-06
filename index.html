@@ -4,6 +4,50 @@
 		
 		<title>Levelling</title>
 		
+		<style>
+			
+			*
+			{
+				padding: 0;
+				margin: 0;
+				border: none;
+				outline: none;
+			}
+			
+			body
+			{
+				background: #333;
+			}
+			
+			.box
+			{
+				width: 40px;
+				height: 40px;
+				
+				margin: 20px;
+				
+				float: left;
+				
+				background: #fff;
+				
+			}
+			
+			.box-inner
+			{
+				width: inherit;
+				height: inherit;
+				
+				pointer-events: none;
+				
+				background: #ff0033;
+			}
+			
+		</style>
+		
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+		
+		
 		<script type="text/javascript">
 			
 			var trace = function(str){ console.log(str); };
@@ -13,8 +57,11 @@
 			var record;
 			
 			
-			var p1_level;
+			var p1_level = 0;
 			var p2_level;
+			
+			var updateLevel = false;
+			var updateLevelVal = 1;
 			
 			function init(event)
 			{
@@ -24,34 +71,100 @@
 			
 				record = {};
 				
+				setup();
+				
+				// test();
+			}
+			
+			function setup()
+			{
+				$(".box").each(function(i)
+				{
+					var id = $(this).attr("id");
+					
+					$(this).on("click", clickEvent);
+					$(this).css("cursor", "pointer");
+					
+					switch($("#" + id).attr("data-difficulty"))
+					{
+						case "easy":
+						{
+							$("#" + id + " .box-inner").css("opacity", 0.25);
+							
+							break;
+						}
+						
+						case "medium":
+						{
+							
+							$("#" + id + " .box-inner").css("opacity", 0.5);
+							
+							break;
+						}
+						
+						case "hard":
+						{
+							
+							$("#" + id + " .box-inner").css("opacity", 0.75);
+							
+							break;
+						}
+						
+						case "super":
+						{
+							$("#" + id + " .box-inner").css("opacity", 1);
+							
+							break;
+						}
+					}
+					
+					
+				});
+			}
+			
+			function clickEvent(event)
+			{
+				// trace("MY LEVEL == " + p1_level + " THEIR LEVEL == " + $("#" + event.target.id).attr("data-level"));
+				
+				
+				
+				// setLevel(p1_level, 100);
+			
+			
+				p2_level = parseInt($("#" + event.target.id).attr("data-level"));
+				
+				trace("MY LEVEL == " + p1_level + " THEIR LEVEL == " + p2_level);
+				
 				test();
 			}
 			
 			function test()
 			{
-				setLevel(0, 100);
-				
 				record.gameLevel = levelOffset();
 				
-				if(record.gameLevel < 5)
+				if(record.gameLevel >= 0 && record.gameLevel < 5)
 				{
 					record.difficulty = "EASY";
 				}
 				
-				else if(record.gameLevel < 10)
+				else if(record.gameLevel >= 5 && record.gameLevel < 10)
 				{
 					record.difficulty = "MEDIUM";
 				}
 				
-				else if(record.gameLevel < 1000)
+				else if(record.gameLevel >= 10 && record.gameLevel < 90)
 				{
 					record.difficulty = "HARD";
 				}
 				
+/*
 				else
 				{
 					record.difficulty = "SUPER";
 				}
+*/
+				
+				mockFight();
 				
 				trace(record);
 			}
@@ -70,17 +183,29 @@
 				// ok
 				if(p1_level === p2_level)
 				{
+					trace("EVEN");
+					
 					setLevel = 5; // medium normal
+					
+					updateLevel = true;
 				}
 				
 				// ok
 				else if(p1_level > p2_level)
 				{
+					trace("STRONGER");
+					
 					setLevel = 0;
+					
+					updateLevel = false;
 				}
 				
 				else if(p1_level < p2_level)
 				{
+					trace("WEAKER");
+					
+					updateLevel = true;
+					
 					newLevel = Math.abs(p1_level - p2_level);
 					
 					record.checkLevel = newLevel;
@@ -125,12 +250,143 @@
 				return setLevel;
 			}
 			
+			function mockFight()
+			{
+				var beatNumber;
+				var yourNumber = Math.floor(Math.random() * 101);
+				
+				if(record.difficulty = "EASY")
+				{
+					beatNumber = 25;
+				}
+				
+				if(record.difficulty = "MEDIUM")
+				{
+					beatNumber = 50;
+				}
+				
+				if(record.difficulty = "HARD")
+				{
+					beatNumber = 75;
+				}
+				
+				if(record.difficulty = "SUPER")
+				{
+					beatNumber = 101;
+				}
+				
+				if(yourNumber > beatNumber)
+				{
+					result_win();
+				}
+				
+				else if(yourNumber === beatNumber)
+				{
+					alert("DRAW");
+				}
+				
+				else
+				{
+					alert("LOSE");
+				}
+				
+				
+			}
+						
+			function result_win()
+			{
+				if(updateLevel)
+				{
+					updateLevel = false;
+					
+					p1_level += updateLevelVal;
+				}
+			}
+			
 			
 		</script>
 		
 	</head>
 	
 	<body onload="init(event);">
+	
+	<div id="box0" class="box" data-difficulty="easy" data-level="0">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box1" class="box" data-difficulty="easy" data-level="1">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box2" class="box" data-difficulty="easy" data-level="3">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box3" class="box" data-difficulty="easy" data-level="3">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box4" class="box" data-difficulty="easy" data-level="2">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box5" class="box" data-difficulty="easy" data-level="1">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box6" class="box" data-difficulty="medium" data-level="5">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box7" class="box" data-difficulty="medium" data-level="5">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box8" class="box" data-difficulty="medium" data-level="7">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box9" class="box" data-difficulty="medium" data-level="8">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box10" class="box" data-difficulty="hard" data-level="10">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box11" class="box" data-difficulty="hard" data-level="20">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="box12" class="box" data-difficulty="super" data-level="800">
+		
+		<div class="box-inner"></div>
+		
+	</div>
 	
 	</body>
 	
