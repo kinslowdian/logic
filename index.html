@@ -1,0 +1,137 @@
+<html lang="en>">
+	
+	<head>
+		
+		<title>Levelling</title>
+		
+		<script type="text/javascript">
+			
+			var trace = function(str){ console.log(str); };
+			
+			var a = new Array();
+			
+			var record;
+			
+			
+			var p1_level;
+			var p2_level;
+			
+			function init(event)
+			{
+				trace(event);
+				
+				a = [0, 5, 10, 1000];
+			
+				record = {};
+				
+				test();
+			}
+			
+			function test()
+			{
+				setLevel(0, 100);
+				
+				record.gameLevel = levelOffset();
+				
+				if(record.gameLevel < 5)
+				{
+					record.difficulty = "EASY";
+				}
+				
+				else if(record.gameLevel < 10)
+				{
+					record.difficulty = "MEDIUM";
+				}
+				
+				else if(record.gameLevel < 1000)
+				{
+					record.difficulty = "HARD";
+				}
+				
+				else
+				{
+					record.difficulty = "SUPER";
+				}
+				
+				trace(record);
+			}
+			
+			function setLevel(p1, p2)
+			{
+				p1_level = p1;
+				p2_level = p2;
+			}
+			
+			function levelOffset()
+			{
+				var newLevel;
+				var setLevel;
+				
+				// ok
+				if(p1_level === p2_level)
+				{
+					setLevel = 5; // medium normal
+				}
+				
+				// ok
+				else if(p1_level > p2_level)
+				{
+					setLevel = 0;
+				}
+				
+				else if(p1_level < p2_level)
+				{
+					newLevel = Math.abs(p1_level - p2_level);
+					
+					record.checkLevel = newLevel;
+					
+					if(newLevel > 100)
+					{
+						setLevel = a[a.length - 1];
+					}
+					
+					else
+					{
+						for(var i = 0; i < a.length; i++)
+						{
+							// ok
+							
+							if(newLevel === a[i])
+							{
+								setLevel = a[i];
+							}
+							
+							else if(newLevel > a[i] && newLevel < a[i+1])
+							{
+								if(newLevel < (a[i] + Math.floor(a[i+1] * 0.5)))
+								{
+									setLevel = a[i];
+								}
+								
+								else if(newLevel > (a[i] + Math.floor(a[i+1] * 0.5)))
+								{
+									setLevel = a[i+1];
+								}
+								
+								else
+								{
+									setLevel = a[a.length - 1];
+								}
+							}
+						}	
+					}
+				} 
+				
+				return setLevel;
+			}
+			
+			
+		</script>
+		
+	</head>
+	
+	<body onload="init(event);">
+	
+	</body>
+	
+</html>
