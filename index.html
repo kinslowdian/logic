@@ -135,7 +135,17 @@
 				
 				trace("MY LEVEL == " + p1_level + " THEIR LEVEL == " + p2_level);
 				
+				
+				updateLevels();
+				
 				test();
+			}
+			
+			// test only
+			function updateLevels()
+			{
+				record.p1_level = p1_level;
+				record.p2_level = p2_level;				
 			}
 			
 			function test()
@@ -157,12 +167,10 @@
 					record.difficulty = "HARD";
 				}
 				
-/*
 				else
 				{
 					record.difficulty = "SUPER";
 				}
-*/
 				
 				mockFight();
 				
@@ -255,28 +263,31 @@
 				var beatNumber;
 				var yourNumber = Math.floor(Math.random() * 101);
 				
-				if(record.difficulty = "EASY")
+				if(record.difficulty === "EASY")
 				{
 					beatNumber = 25;
 				}
 				
-				if(record.difficulty = "MEDIUM")
+				if(record.difficulty === "MEDIUM")
 				{
 					beatNumber = 50;
 				}
 				
-				if(record.difficulty = "HARD")
+				if(record.difficulty === "HARD")
 				{
 					beatNumber = 75;
 				}
 				
-				if(record.difficulty = "SUPER")
+				if(record.difficulty === "SUPER")
 				{
 					beatNumber = 101;
 				}
 				
 				if(yourNumber > beatNumber)
 				{
+					
+					alert("WIN");
+					
 					result_win();
 				}
 				
@@ -300,7 +311,12 @@
 					updateLevel = false;
 					
 					p1_level += updateLevelVal;
+					
+					updateLevels();
 				}
+				
+				trace("END -- ");
+				trace(record);
 			}
 			
 			
