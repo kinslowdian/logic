@@ -95,8 +95,6 @@
 			
 			var trace = function(str){ console.log(str); };
 			
-			var a = new Array();
-			
 			var record;
 			
 			
@@ -106,6 +104,11 @@
 			var updateLevel = false;
 			var updateLevelVal = 1;
 			
+			var enemyArray = new Array();
+			
+			var player_1 = {};
+			var player_2 = {};
+			
 			function init(event)
 			{
 				trace(event);
@@ -114,11 +117,145 @@
 			
 				record = {};
 				
-				setup();
+				init_player1()
 				
-				// test();
+				populate();
 			}
 			
+			function init_player1()
+			{
+				player_1.level = 0;
+				player_1.attack = 0;
+				player_1.difficulty = "EASY";
+				player_1.win = false;				
+			}
+			
+			function purge_player1()
+			{
+				player_1.attack = 0;
+				player_1.win = false;
+			}
+			
+			function init_player2(lv, diff)
+			{
+				player_2.level = lv;
+				player_2.attack = 0;
+				player_2.difficulty = diff;
+				player_2.win = false;				
+			}
+			
+			function populate()
+			{
+				for(var i = 0; i < 40; i++)
+				{
+					var string_id = "box" + i;
+					var string_lv = Math.floor(Math.random() * 30);
+					
+					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="box-inner"></div></div>';
+				
+					$("body").append(enemyHTML);
+				}
+			
+				setup();
+			}
+			
+			function setup()
+			{
+				$(".box").each(function(i)
+				{
+					var _id = $(this).attr("id");
+					
+					$(this).on("click", clickEvent);
+					$(this).css("cursor", "pointer");
+					
+					var E = {};
+					
+					E._id = _id;
+					E.level = parseInt($("#" + E._id).attr("data-level"));
+					
+					enemyArray.push(E);
+				});
+				
+				splitDifficulty();
+			}
+			
+			function splitDifficulty()
+			{
+				//0 - 9 	= easy
+				//10 - 19 	= medium
+				//20 - 29	= hard 
+				//			= super
+				
+				for(var i in enemyArray)
+				{
+					if(enemyArray[i].level >= 0 && enemyArray[i].level < 10)
+					{
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
+						
+						enemyArray[i].difficulty = "EASY";
+					}
+					
+					else if(enemyArray[i].level >= 10 && enemyArray[i].level < 20)
+					{
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);	
+						
+						enemyArray[i].difficulty = "MEDIUM";
+					}
+					
+					else if(enemyArray[i].level >= 20 && enemyArray[i].level < 30)
+					{
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);		
+						
+						enemyArray[i].difficulty = "HARD";
+					}
+					
+					else
+					{
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
+						
+						enemyArray[i].difficulty = "SUPER";
+					}
+				}
+			}
+			
+			function clickEvent(event)
+			{
+				for(var i in enemyArray)
+				{
+					if(event.target.id === enemyArray[i]._id)
+					{
+						sortEnemy(enemyArray[i]);
+						
+						break;
+					}
+				}
+			}
+			
+			function sortEnemy(e_ob)
+			{
+				init_player2(e_ob.level, e_ob.difficulty);
+				
+				updateDisplay()
+			}
+			
+			
+			function updateDisplay()
+			{
+				$("#info_p1 .level").text(player_1.level);
+				$("#info_p2 .level").text(player_2.level);
+				
+				$("#info_p1 .class").text(player_1.difficulty);
+				$("#info_p2 .class").text(player_2.difficulty);
+				
+				$("#info_p1 .num").text(player_1.attack);
+				$("#info_p2 .num").text(player_2.attack);
+			
+			}
+			
+			
+			
+			
+/*
 			function setup()
 			{
 				$(".box").each(function(i)
@@ -404,6 +541,7 @@
 				trace("END -- ");
 				trace(record);
 			}
+*/
 			
 			
 		</script>
@@ -412,90 +550,7 @@
 	
 	<body onload="init(event);">
 	
-	<div id="box0" class="box" data-difficulty="easy" data-level="0">
-		
-		<div class="box-inner"></div>
-		
-	</div>
 	
-	<div id="box1" class="box" data-difficulty="easy" data-level="1">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box2" class="box" data-difficulty="easy" data-level="3">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box3" class="box" data-difficulty="easy" data-level="3">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box4" class="box" data-difficulty="easy" data-level="2">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box5" class="box" data-difficulty="easy" data-level="1">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box6" class="box" data-difficulty="medium" data-level="5">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box7" class="box" data-difficulty="medium" data-level="5">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box8" class="box" data-difficulty="medium" data-level="7">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box9" class="box" data-difficulty="medium" data-level="8">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box10" class="box" data-difficulty="hard" data-level="10">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-
-	<div id="box13" class="box" data-difficulty="hard" data-level="15">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-
-	
-	<div id="box11" class="box" data-difficulty="hard" data-level="20">
-		
-		<div class="box-inner"></div>
-		
-	</div>
-	
-	<div id="box12" class="box" data-difficulty="super" data-level="800">
-		
-		<div class="box-inner"></div>
-		
-	</div>
 	
 	<div id="info">
 		
@@ -503,6 +558,7 @@
 			
 			<p>PLAYER 1</p>
 			<p>LEVEL	: <span class="level"></span></p>
+			<p>CLASS	: <span class="class"></span></p>
 			<p>BLOW		: <span class="num"></span></p>
 			<p>RESULT	: <span class="outcome"></span></p>
 		
@@ -512,6 +568,7 @@
 			
 			<p>PLAYER 2</p>
 			<p>LEVEL	: <span class="level"></span></p>
+			<p>CLASS	: <span class="class"></span></p>
 			<p>BLOW		: <span class="num"></span></p>
 			<p>RESULT	: <span class="outcome"></span></p>
 		
