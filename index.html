@@ -17,6 +17,9 @@
 			body
 			{
 				background: #333;
+				
+				
+				overflow: hidden;
 			}
 			
 			.box
@@ -40,6 +43,46 @@
 				pointer-events: none;
 				
 				background: #ff0033;
+			}
+			
+			#info
+			{
+				width: 100%;
+				height: 100%;
+				background: #000;
+				position: absolute;
+				
+				top: 40%;
+				left: 0;
+				
+				overflow: hidden;
+			}
+			
+			#info p
+			{
+				width:  inherit;
+				font-family: sans-serif;
+				font-weight: bold;
+				color: pink;
+				padding: 20px;
+			}
+			
+			#info_p1
+			{
+				/* width: 30%; */
+				position: absolute;
+				left: 0;
+				
+				text-align: left;
+			}
+			
+			#info_p2
+			{
+				/* width: 30%; */
+				position: absolute;
+				right: 0;
+				
+				text-align: right;
 			}
 			
 		</style>
@@ -145,7 +188,14 @@
 			function updateLevels()
 			{
 				record.p1_level = p1_level;
-				record.p2_level = p2_level;				
+				record.p2_level = p2_level;
+				
+				$("#info_p1 .level").text(record.p1_level);
+				$("#info_p2 .level").text(record.p2_level);
+				
+				$("#info_p1 .num").text(record.p1_num);
+				$("#info_p2 .num").text(record.p2_num);
+			
 			}
 			
 			function test()
@@ -261,7 +311,30 @@
 			function mockFight()
 			{
 				var beatNumber;
-				var yourNumber = Math.floor(Math.random() * 101);
+				var yourNumber;
+				
+				var experienceNumber0;
+				
+				// level up to MEDIUM
+				
+				if(p1_level > 5 && p1_level < 10)
+				{
+					experienceNumber = 10;
+				}
+				
+				// level up to Hard
+				
+				else if(p1_level > 10)
+				{
+					experienceNumber = 20;
+				}
+				
+				else
+				{
+					experienceNumber = 0;
+				}
+				
+				yourNumber = Math.floor(Math.random() * (101 - experienceNumber) + experienceNumber);
 				
 				if(record.difficulty === "EASY")
 				{
@@ -289,23 +362,32 @@
 				
 				if(yourNumber > beatNumber)
 				{
+					$("#info_p1 .outcome").text("WIN");
+					$("#info_p2 .outcome").text("DOOMED");
 					
-					alert("WIN");
+					
+					// alert("WIN");
 					
 					result_win();
 				}
 				
 				else if(yourNumber === beatNumber)
 				{
-					alert("DRAW");
+					// alert("DRAW");
+				
+					$("#info_p1 .outcome").text("DRAW");
+					$("#info_p2 .outcome").text("DRAW");
 				}
 				
 				else
 				{
-					alert("LOSE");
+					// alert("LOSE");
+					
+					$("#info_p1 .outcome").text("DOOMED");
+					$("#info_p2 .outcome").text("WIN");
 				}
 				
-				
+				updateLevels();
 			}
 						
 			function result_win()
@@ -395,6 +477,13 @@
 		<div class="box-inner"></div>
 		
 	</div>
+
+	<div id="box13" class="box" data-difficulty="hard" data-level="15">
+		
+		<div class="box-inner"></div>
+		
+	</div>
+
 	
 	<div id="box11" class="box" data-difficulty="hard" data-level="20">
 		
@@ -405,6 +494,28 @@
 	<div id="box12" class="box" data-difficulty="super" data-level="800">
 		
 		<div class="box-inner"></div>
+		
+	</div>
+	
+	<div id="info">
+		
+		<div id="info_p1">
+			
+			<p>PLAYER 1</p>
+			<p>LEVEL	: <span class="level"></span></p>
+			<p>BLOW		: <span class="num"></span></p>
+			<p>RESULT	: <span class="outcome"></span></p>
+		
+		</div>
+		
+		<div id="info_p2">
+			
+			<p>PLAYER 2</p>
+			<p>LEVEL	: <span class="level"></span></p>
+			<p>BLOW		: <span class="num"></span></p>
+			<p>RESULT	: <span class="outcome"></span></p>
+		
+		</div>
 		
 	</div>
 	
