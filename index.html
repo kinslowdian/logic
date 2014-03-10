@@ -33,6 +33,9 @@
 				
 				background: #fff;
 				
+				-webkit-transition: all 0.4s ease-in-out;
+				transition: all 0.4s ease-in-out;
+				
 			}
 			
 			.box-inner
@@ -43,6 +46,9 @@
 				pointer-events: none;
 				
 				background: #ff0033;
+				
+				-webkit-transition: all 0.4s ease-in-out;
+				transition: all 0.4s ease-in-out;
 			}
 			
 			#info
@@ -135,7 +141,7 @@
 			{
 				player_1.level 			= 0;
 				player_1.attack 		= 0;
-				player_1.difficulty 	= "";
+				player_1.battle_class 	= "";
 				player_1.win 			= false;
 				player_1.status 		= "";				
 			
@@ -152,7 +158,7 @@
 			{
 				player_2.level 			= lv;
 				player_2.attack 		= 0;
-				player_2.difficulty 	= diff;
+				player_2.battle_class 	= diff;
 				player_2.win 			= false;				
 				player_2.status 		= "";
 			}
@@ -186,6 +192,7 @@
 					E._id = _id;
 					E.level = parseInt($("#" + E._id).attr("data-level"));
 					E.alive = true;
+					E.active = true;
 					
 					enemyArray.push(E);
 				});
@@ -195,28 +202,30 @@
 			
 			function splitDifficulty()
 			{
+				var allDead = true;
+				
 				for(var i in enemyArray)
 				{
 					playerLevelSort(enemyArray[i]);
 					
 					if(enemyArray[i].alive)
 					{
-						if(enemyArray[i].difficulty === "APPRENTICE")
+						if(enemyArray[i].battle_class === "APPRENTICE")
 						{
 							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
 						}
 						
-						else if(enemyArray[i].difficulty === "KNIGHT")
+						else if(enemyArray[i].battle_class === "KNIGHT")
 						{
 							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
 						}
 						
-						else if(enemyArray[i].difficulty === "MASTER")
+						else if(enemyArray[i].battle_class === "MASTER")
 						{
 							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
 						}
 						
-						else if(enemyArray[i].difficulty === "LORD")
+						else if(enemyArray[i].battle_class === "LORD")
 						{
 							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
 						}
@@ -225,13 +234,25 @@
 						{
 							
 						}
+						
+						allDead = false;
 					}
 					
 					else
 					{
-						$("#" + enemyArray[i]._id).off("click", clickEvent);
-						$("#" + enemyArray[i]._id).css("cursor", "default");						
+						if(enemyArray[i].active)
+						{
+							enemyArray[i].active = false;
+							
+							$("#" + enemyArray[i]._id).off("click", clickEvent);
+							$("#" + enemyArray[i]._id).css("cursor", "default");	
+						}						
 					}
+				}
+				
+				if(allDead)
+				{
+					alert("ENTER BOSS!");
 				}
 			}
 			
@@ -262,8 +283,8 @@
 				$("#info_p1 .level").text(player_1.level);
 				$("#info_p2 .level").text(player_e.level);
 				
-				$("#info_p1 .class").text(player_1.difficulty);
-				$("#info_p2 .class").text(player_e.difficulty);
+				$("#info_p1 .class").text(player_1.battle_class);
+				$("#info_p2 .class").text(player_e.battle_class);
 				
 				$("#info_p1 .num").text(player_1.attack);
 				$("#info_p2 .num").text(player_e.attack);
@@ -274,30 +295,30 @@
 			{
 				if(player_ob.level >= playerLevelSettings.easy && player_ob.level < playerLevelSettings.medium)
 				{
-					player_ob.difficulty = "APPRENTICE";
+					player_ob.battle_class = "APPRENTICE";
 					player_ob.magic = 0;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.medium && player_ob.level < playerLevelSettings.high)
 				{	
-					player_ob.difficulty = "KNIGHT";
+					player_ob.battle_class = "KNIGHT";
 					player_ob.magic = 15;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.high && player_ob.level < playerLevelSettings.max_super)
 				{		
-					player_ob.difficulty = "MASTER";
+					player_ob.battle_class = "MASTER";
 					player_ob.magic = 35;
 				}
 					
 				else
 				{
-					player_ob.difficulty = "LORD";
+					player_ob.battle_class = "LORD";
 					player_ob.magic = 50;
 				}				
 			}
 			
-			function playerProgress(player_w, player_l)
+			function playerProgress(player_w, player_l, enemy)
 			{
 				var updateLevel = false;
 				var updateValue;
@@ -316,7 +337,16 @@
 				if(player_w.level < player_l.level)
 				{
 					updateLevel = true;
-					updateValue = player_w.level += Math.round(player_l.level * 0.5);
+					
+					if(enemy)
+					{
+						updateValue = player_w.level += player_l.level;
+					}
+					
+					else
+					{
+						updateValue = player_w.level += Math.round(player_l.level * 0.5);	
+					}
 				}
 				
 				if(updateLevel)
@@ -332,10 +362,22 @@
 			{
 				var status_1 = "";
 				var status_2 = "";
+				var finalMagic;
 				
 				track_play ++;
 				
-				player_1.attack = Math.floor(Math.random() * (101 - player_1.magic) + player_1.magic);
+				
+				if(player_1.battle_class === player_e.battle_class)
+				{
+					finalMagic = Math.floor(player_1.magic * 0.5);
+				}
+				
+				else
+				{
+					finalMagic = player_1.magic;	
+				}
+				
+				player_1.attack = Math.floor(Math.random() * (101 - finalMagic) + finalMagic);
 				
 				player_e.attack = Math.floor(Math.random() * (101 - player_e.magic) + player_e.magic);
 				
@@ -351,9 +393,13 @@
 					status_1 = "WIN";
 					status_2 = "LOSE";
 					
-					playerProgress(player_1, player_e);
+					playerProgress(player_1, player_e, false);
 					
 					$("#" + player_e._id).css("opacity", 0);
+					
+					// $("#" + player_e._id)[0].addEventListener("webkitTransitionEnd", removeFromStage, false);
+					// $("#" + player_e._id)[0].addEventListener("transitionend", removeFromStage, false);
+					
 					
 					player_e.alive = false;
 					
@@ -367,7 +413,7 @@
 					status_1 = "LOSE";
 					status_2 = "WIN";
 					
-					playerProgress(player_e, player_1);
+					playerProgress(player_e, player_1, true);
 					
 					playerLevelSort(player_e);
 					
@@ -382,6 +428,14 @@
 				track_plays();
 			}
 			
+			function removeFromStage(event)
+			{
+				$("#" + event.target.id)[0].addEventListener("webkitTransitionEnd", removeFromStage, false);
+				$("#" + event.target.id)[0].addEventListener("transitionend", removeFromStage, false);
+			
+				$("#" + event.target.id).remove();
+			}
+			
 			function track_plays()
 			{
 				trace("---------------------------------");
@@ -393,294 +447,6 @@
 			
 			
 			
-			
-/*
-			function setup()
-			{
-				$(".box").each(function(i)
-				{
-					var id = $(this).attr("id");
-					
-					$(this).on("click", clickEvent);
-					$(this).css("cursor", "pointer");
-					
-					switch($("#" + id).attr("data-difficulty"))
-					{
-						case "easy":
-						{
-							$("#" + id + " .box-inner").css("opacity", 0.25);
-							
-							break;
-						}
-						
-						case "medium":
-						{
-							
-							$("#" + id + " .box-inner").css("opacity", 0.5);
-							
-							break;
-						}
-						
-						case "hard":
-						{
-							
-							$("#" + id + " .box-inner").css("opacity", 0.75);
-							
-							break;
-						}
-						
-						case "super":
-						{
-							$("#" + id + " .box-inner").css("opacity", 1);
-							
-							break;
-						}
-					}
-					
-					
-				});
-			}
-			
-			function clickEvent(event)
-			{
-				// trace("MY LEVEL == " + p1_level + " THEIR LEVEL == " + $("#" + event.target.id).attr("data-level"));
-				
-				
-				
-				// setLevel(p1_level, 100);
-			
-			
-				p2_level = parseInt($("#" + event.target.id).attr("data-level"));
-				
-				trace("MY LEVEL == " + p1_level + " THEIR LEVEL == " + p2_level);
-				
-				
-				updateLevels();
-				
-				test();
-			}
-			
-			// test only
-			function updateLevels()
-			{
-				record.p1_level = p1_level;
-				record.p2_level = p2_level;
-				
-				$("#info_p1 .level").text(record.p1_level);
-				$("#info_p2 .level").text(record.p2_level);
-				
-				$("#info_p1 .num").text(record.p1_num);
-				$("#info_p2 .num").text(record.p2_num);
-			
-			}
-			
-			function test()
-			{
-				record.gameLevel = levelOffset();
-				
-				if(record.gameLevel >= 0 && record.gameLevel < 5)
-				{
-					record.difficulty = "EASY";
-				}
-				
-				else if(record.gameLevel >= 5 && record.gameLevel < 10)
-				{
-					record.difficulty = "MEDIUM";
-				}
-				
-				else if(record.gameLevel >= 10 && record.gameLevel < 90)
-				{
-					record.difficulty = "HARD";
-				}
-				
-				else
-				{
-					record.difficulty = "SUPER";
-				}
-				
-				mockFight();
-				
-				trace(record);
-			}
-			
-			function setLevel(p1, p2)
-			{
-				p1_level = p1;
-				p2_level = p2;
-			}
-			
-			function levelOffset()
-			{
-				var newLevel;
-				var setLevel;
-				
-				// ok
-				if(p1_level === p2_level)
-				{
-					trace("EVEN");
-					
-					setLevel = 5; // medium normal
-					
-					updateLevel = true;
-				}
-				
-				// ok
-				else if(p1_level > p2_level)
-				{
-					trace("STRONGER");
-					
-					setLevel = 0;
-					
-					updateLevel = false;
-				}
-				
-				else if(p1_level < p2_level)
-				{
-					trace("WEAKER");
-					
-					updateLevel = true;
-					
-					newLevel = Math.abs(p1_level - p2_level);
-					
-					record.checkLevel = newLevel;
-					
-					if(newLevel > 100)
-					{
-						setLevel = a[a.length - 1];
-					}
-					
-					else
-					{
-						for(var i = 0; i < a.length; i++)
-						{
-							// ok
-							
-							if(newLevel === a[i])
-							{
-								setLevel = a[i];
-							}
-							
-							else if(newLevel > a[i] && newLevel < a[i+1])
-							{
-								if(newLevel < (a[i] + Math.floor(a[i+1] * 0.5)))
-								{
-									setLevel = a[i];
-								}
-								
-								else if(newLevel > (a[i] + Math.floor(a[i+1] * 0.5)))
-								{
-									setLevel = a[i+1];
-								}
-								
-								else
-								{
-									setLevel = a[a.length - 1];
-								}
-							}
-						}	
-					}
-				} 
-				
-				return setLevel;
-			}
-			
-			function mockFight()
-			{
-				var beatNumber;
-				var yourNumber;
-				
-				var experienceNumber0;
-				
-				// level up to MEDIUM
-				
-				if(p1_level > 5 && p1_level < 10)
-				{
-					experienceNumber = 10;
-				}
-				
-				// level up to Hard
-				
-				else if(p1_level > 10)
-				{
-					experienceNumber = 20;
-				}
-				
-				else
-				{
-					experienceNumber = 0;
-				}
-				
-				yourNumber = Math.floor(Math.random() * (101 - experienceNumber) + experienceNumber);
-				
-				if(record.difficulty === "EASY")
-				{
-					beatNumber = 25;
-				}
-				
-				if(record.difficulty === "MEDIUM")
-				{
-					beatNumber = 50;
-				}
-				
-				if(record.difficulty === "HARD")
-				{
-					beatNumber = 75;
-				}
-				
-				if(record.difficulty === "SUPER")
-				{
-					beatNumber = 101;
-				}
-				
-				record.p1_num = yourNumber;
-				record.p2_num = beatNumber;
-				
-				
-				if(yourNumber > beatNumber)
-				{
-					$("#info_p1 .outcome").text("WIN");
-					$("#info_p2 .outcome").text("DOOMED");
-					
-					
-					// alert("WIN");
-					
-					result_win();
-				}
-				
-				else if(yourNumber === beatNumber)
-				{
-					// alert("DRAW");
-				
-					$("#info_p1 .outcome").text("DRAW");
-					$("#info_p2 .outcome").text("DRAW");
-				}
-				
-				else
-				{
-					// alert("LOSE");
-					
-					$("#info_p1 .outcome").text("DOOMED");
-					$("#info_p2 .outcome").text("WIN");
-				}
-				
-				updateLevels();
-			}
-						
-			function result_win()
-			{
-				if(updateLevel)
-				{
-					updateLevel = false;
-					
-					p1_level += updateLevelVal;
-					
-					updateLevels();
-				}
-				
-				trace("END -- ");
-				trace(record);
-			}
-*/
 			
 			
 		</script>
