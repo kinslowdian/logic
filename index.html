@@ -109,6 +109,11 @@
 			
 			var playerLevelSettings = {};
 			
+			var track_draw = 0;
+			var track_win = 0;
+			var track_lose = 0;
+			var track_play = 0;
+			
 			function init(event)
 			{
 				trace(event);
@@ -128,10 +133,11 @@
 			
 			function init_player1()
 			{
-				player_1.level = 0;
-				player_1.attack = 0;
-				player_1.difficulty = "";
-				player_1.win = false;				
+				player_1.level 			= 0;
+				player_1.attack 		= 0;
+				player_1.difficulty 	= "";
+				player_1.win 			= false;
+				player_1.status 		= "";				
 			
 				playerLevelSort(player_1);
 			}
@@ -144,10 +150,11 @@
 			
 			function init_player2(lv, diff)
 			{
-				player_2.level = lv;
-				player_2.attack = 0;
-				player_2.difficulty = diff;
-				player_2.win = false;				
+				player_2.level 			= lv;
+				player_2.attack 		= 0;
+				player_2.difficulty 	= diff;
+				player_2.win 			= false;				
+				player_2.status 		= "";
 			}
 			
 			function populate()
@@ -178,6 +185,7 @@
 					
 					E._id = _id;
 					E.level = parseInt($("#" + E._id).attr("data-level"));
+					E.alive = true;
 					
 					enemyArray.push(E);
 				});
@@ -191,29 +199,38 @@
 				{
 					playerLevelSort(enemyArray[i]);
 					
-					if(enemyArray[i].difficulty === "APPRENTICE")
+					if(enemyArray[i].alive)
 					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
-					}
-					
-					else if(enemyArray[i].difficulty === "KNIGHT")
-					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
-					}
-					
-					else if(enemyArray[i].difficulty === "MASTER")
-					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
-					}
-					
-					else if(enemyArray[i].difficulty === "LORD")
-					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
+						if(enemyArray[i].difficulty === "APPRENTICE")
+						{
+							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
+						}
+						
+						else if(enemyArray[i].difficulty === "KNIGHT")
+						{
+							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
+						}
+						
+						else if(enemyArray[i].difficulty === "MASTER")
+						{
+							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
+						}
+						
+						else if(enemyArray[i].difficulty === "LORD")
+						{
+							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
+						}
+						
+						else
+						{
+							
+						}
 					}
 					
 					else
 					{
-						
+						$("#" + enemyArray[i]._id).off("click", clickEvent);
+						$("#" + enemyArray[i]._id).css("cursor", "default");						
 					}
 				}
 			}
@@ -231,24 +248,25 @@
 				}
 			}
 			
-			function sortEnemy(e_ob)
+			
+			function sortEnemy(player_e)
 			{
-				init_player2(e_ob.level, e_ob.difficulty);
+				player1_player2_battle(player_e);
 				
-				updateDisplay()
+				updateDisplay(player_e)
 			}
 			
 			
-			function updateDisplay()
+			function updateDisplay(player_e)
 			{
 				$("#info_p1 .level").text(player_1.level);
-				$("#info_p2 .level").text(player_2.level);
+				$("#info_p2 .level").text(player_e.level);
 				
 				$("#info_p1 .class").text(player_1.difficulty);
-				$("#info_p2 .class").text(player_2.difficulty);
+				$("#info_p2 .class").text(player_e.difficulty);
 				
 				$("#info_p1 .num").text(player_1.attack);
-				$("#info_p2 .num").text(player_2.attack);
+				$("#info_p2 .num").text(player_e.attack);
 			
 			}
 			
@@ -257,52 +275,120 @@
 				if(player_ob.level >= playerLevelSettings.easy && player_ob.level < playerLevelSettings.medium)
 				{
 					player_ob.difficulty = "APPRENTICE";
+					player_ob.magic = 0;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.medium && player_ob.level < playerLevelSettings.high)
 				{	
 					player_ob.difficulty = "KNIGHT";
+					player_ob.magic = 15;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.high && player_ob.level < playerLevelSettings.max_super)
 				{		
 					player_ob.difficulty = "MASTER";
+					player_ob.magic = 35;
 				}
 					
 				else
 				{
 					player_ob.difficulty = "LORD";
+					player_ob.magic = 50;
 				}				
 			}
 			
-			function player1_progress()
+			function playerProgress(player_w, player_l)
 			{
 				var updateLevel = false;
 				var updateValue;
 				
-				if(player_1.level > player_2.level)
+				if(player_w.level > player_l.level)
 				{
 					updateLevel = false;
 				}
 				
-				if(player_1.level === player_2.level)
+				if(player_w.level === player_l.level)
 				{
 					updateLevel = true;
-					updateValue = player_1.level += 1;
+					updateValue = player_w.level += 1;
 				}
 				
-				if(player_1.level < player_2.level)
+				if(player_w.level < player_l.level)
 				{
 					updateLevel = true;
-					updateValue = player_2.level;
+					updateValue = player_w.level += Math.round(player_l.level * 0.5);
 				}
 				
 				if(updateLevel)
 				{
-					player_1.level = updateValue;
+					player_w.level = updateValue;
+					
+					playerLevelSort(player_w);
+				}
+			}
+			
+			
+			function player1_player2_battle(player_e)
+			{
+				var status_1 = "";
+				var status_2 = "";
+				
+				track_play ++;
+				
+				player_1.attack = Math.floor(Math.random() * (101 - player_1.magic) + player_1.magic);
+				
+				player_e.attack = Math.floor(Math.random() * (101 - player_e.magic) + player_e.magic);
+				
+				if(player_1.attack === player_e.attack)
+				{
+					status_1 = status_2 = "DRAW";
+					
+					track_draw ++;
+				}
+				
+				if(player_1.attack > player_e.attack)
+				{
+					status_1 = "WIN";
+					status_2 = "LOSE";
+					
+					playerProgress(player_1, player_e);
+					
+					$("#" + player_e._id).css("opacity", 0);
+					
+					player_e.alive = false;
 					
 					playerLevelSort(player_1);
+					
+					track_win ++;
 				}
+				
+				else
+				{
+					status_1 = "LOSE";
+					status_2 = "WIN";
+					
+					playerProgress(player_e, player_1);
+					
+					playerLevelSort(player_e);
+					
+					splitDifficulty();
+					
+					track_lose ++;	
+				}
+				
+				$("#info_p1 .outcome").text(status_1);
+				$("#info_p2 .outcome").text(status_2);
+				
+				track_plays();
+			}
+			
+			function track_plays()
+			{
+				trace("---------------------------------");
+				trace("PLAYS == " + track_play);
+				trace("DRAWS == " + track_draw);
+				trace("WINS == " + track_win);
+				trace("LOSE == " + track_lose);
 			}
 			
 			
