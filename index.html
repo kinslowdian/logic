@@ -95,8 +95,6 @@
 			
 			var trace = function(str){ console.log(str); };
 			
-			var record;
-			
 			
 			var p1_level = 0;
 			var p2_level;
@@ -109,13 +107,19 @@
 			var player_1 = {};
 			var player_2 = {};
 			
+			var playerLevelSettings = {};
+			
 			function init(event)
 			{
 				trace(event);
 				
-				a = [0, 5, 10, 1000];
-			
-				record = {};
+				
+				playerLevelSettings = 	{
+											easy		: 0,
+											medium		: 10,
+											high		: 20,
+											max_super	: 30
+										};
 				
 				init_player1()
 				
@@ -126,8 +130,10 @@
 			{
 				player_1.level = 0;
 				player_1.attack = 0;
-				player_1.difficulty = "EASY";
+				player_1.difficulty = "";
 				player_1.win = false;				
+			
+				playerLevelSort(player_1);
 			}
 			
 			function purge_player1()
@@ -181,39 +187,33 @@
 			
 			function splitDifficulty()
 			{
-				//0 - 9 	= easy
-				//10 - 19 	= medium
-				//20 - 29	= hard 
-				//			= super
-				
 				for(var i in enemyArray)
 				{
-					if(enemyArray[i].level >= 0 && enemyArray[i].level < 10)
+					playerLevelSort(enemyArray[i]);
+					
+					if(enemyArray[i].difficulty === "APPRENTICE")
 					{
 						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
-						
-						enemyArray[i].difficulty = "EASY";
 					}
 					
-					else if(enemyArray[i].level >= 10 && enemyArray[i].level < 20)
+					else if(enemyArray[i].difficulty === "KNIGHT")
 					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);	
-						
-						enemyArray[i].difficulty = "MEDIUM";
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
 					}
 					
-					else if(enemyArray[i].level >= 20 && enemyArray[i].level < 30)
+					else if(enemyArray[i].difficulty === "MASTER")
 					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);		
-						
-						enemyArray[i].difficulty = "HARD";
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
+					}
+					
+					else if(enemyArray[i].difficulty === "LORD")
+					{
+						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
 					}
 					
 					else
 					{
-						$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
 						
-						enemyArray[i].difficulty = "SUPER";
 					}
 				}
 			}
@@ -250,6 +250,59 @@
 				$("#info_p1 .num").text(player_1.attack);
 				$("#info_p2 .num").text(player_2.attack);
 			
+			}
+			
+			function playerLevelSort(player_ob)
+			{
+				if(player_ob.level >= playerLevelSettings.easy && player_ob.level < playerLevelSettings.medium)
+				{
+					player_ob.difficulty = "APPRENTICE";
+				}
+					
+				else if(player_ob.level >= playerLevelSettings.medium && player_ob.level < playerLevelSettings.high)
+				{	
+					player_ob.difficulty = "KNIGHT";
+				}
+					
+				else if(player_ob.level >= playerLevelSettings.high && player_ob.level < playerLevelSettings.max_super)
+				{		
+					player_ob.difficulty = "MASTER";
+				}
+					
+				else
+				{
+					player_ob.difficulty = "LORD";
+				}				
+			}
+			
+			function player1_progress()
+			{
+				var updateLevel = false;
+				var updateValue;
+				
+				if(player_1.level > player_2.level)
+				{
+					updateLevel = false;
+				}
+				
+				if(player_1.level === player_2.level)
+				{
+					updateLevel = true;
+					updateValue = player_1.level += 1;
+				}
+				
+				if(player_1.level < player_2.level)
+				{
+					updateLevel = true;
+					updateValue = player_2.level;
+				}
+				
+				if(updateLevel)
+				{
+					player_1.level = updateValue;
+					
+					playerLevelSort(player_1);
+				}
 			}
 			
 			
