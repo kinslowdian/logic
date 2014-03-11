@@ -12,6 +12,10 @@
 				margin: 0;
 				border: none;
 				outline: none;
+				
+				-webkit-touch-callout: none;
+				-webkit-user-select: none;
+				user-select: none;
 			}
 			
 			body
@@ -24,31 +28,56 @@
 			
 			.box
 			{
-				width: 40px;
-				height: 40px;
+				width: 50px;
+				height: 70px;
 				
 				margin: 20px;
 				
 				float: left;
 				
-				background: #fff;
-				
 				-webkit-transition: all 0.4s ease-in-out;
 				transition: all 0.4s ease-in-out;
-				
 			}
 			
-			.box-inner
+			.box .sprite
 			{
-				width: inherit;
-				height: inherit;
+				width: 50px;
+				height: 50px;
 				
 				pointer-events: none;
 				
-				background: #ff0033;
+				margin: 0 0 10px 0;
 				
-				-webkit-transition: all 0.4s ease-in-out;
-				transition: all 0.4s ease-in-out;
+				background: url(sprite.gif) no-repeat left top;
+				background-size: 50px 50px;
+			}
+			
+			.box .box-inner
+			{
+				width: inherit;
+				height: 10px;
+				
+				pointer-events: none;
+				
+				background: #000;
+			}
+			
+			.box .box-inner .box-meter
+			{
+				width: inherit;
+				height: 10px;
+				
+				pointer-events: none;
+				
+				background: rgb(0, 255, 0);
+				
+				-webkit-transform-origin: 0% 50%;
+				
+				-webkit-transform	: scaleX(0);
+				transform			: scaleX(0);
+				
+				-webkit-transition: all 1s ease-in-out;
+				transition: all 1s ease-in-out;
 			}
 			
 			#info
@@ -93,8 +122,8 @@
 			
 			#boss
 			{
-				width: 160px;
-				height: 160px;
+				width: 200px;
+				height: 220px;
 				
 				position: absolute;
 				
@@ -111,6 +140,54 @@
 				
 				-webkit-transition: -webkit-transform 1s linear;
 				transition: transform 1s linear;
+			}
+			
+			
+			#boss .sprite
+			{
+				width: 200px;
+				height: 200px;
+				
+				position: relative;
+				
+				pointer-events: none;
+				
+				margin: 0 0 10px 0;
+				
+				background: url(sprite.gif) no-repeat left top;
+				background-size: 200px 200px;
+			}
+			
+			#boss .box-inner
+			{
+				width: inherit;
+				height: 10px;
+				
+				position: relative;
+				
+				pointer-events: none;
+				
+				background: #000;
+			}
+			
+			#boss .box-inner .box-meter
+			{
+				width: inherit;
+				height: 10px;
+				
+				position: relative;
+				
+				pointer-events: none;
+				
+				background: rgb(0, 255, 0);
+				
+				-webkit-transform-origin: 0% 50%;
+				
+				-webkit-transform	: scaleX(0);
+				transform			: scaleX(0);
+				
+				-webkit-transition: all 1s ease-in-out;
+				transition: all 1s ease-in-out;
 			}
 			
 		</style>
@@ -195,7 +272,7 @@
 					var string_id = "box" + i;
 					var string_lv = Math.floor(Math.random() * 30);
 					
-					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="box-inner"></div></div>';
+					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="sprite"></div><div class="box-inner"><div class="box-meter"></div></div></div>';
 				
 					$("body").append(enemyHTML);
 				}
@@ -243,32 +320,50 @@
 				{
 					playerLevelSort(enemyArray[i]);
 					
+					var meter_css;
+					var meter_scale;
+					
 					if(enemyArray[i].alive)
 					{
 						if(enemyArray[i].battle_class === "APPRENTICE")
 						{
-							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
+							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
+							
+							meter_scale = 0.25;
 						}
 						
 						else if(enemyArray[i].battle_class === "KNIGHT")
 						{
-							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
+							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
+							
+							meter_scale = 0.5;
 						}
 						
 						else if(enemyArray[i].battle_class === "MASTER")
 						{
-							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
+							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
+							
+							meter_scale = 0.75;
 						}
 						
 						else if(enemyArray[i].battle_class === "LORD")
 						{
-							$("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
+							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
+							
+							meter_scale = 1;
 						}
 						
 						else
 						{
 							
 						}
+						
+						meter_css = {
+										"-webkit-transform"	: "scaleX(" + meter_scale + ")",
+										"transform"			: "scaleX(" + meter_scale + ")"
+									};
+						
+						$("#" + enemyArray[i]._id + " .box-inner .box-meter").css(meter_css);
 						
 						// allDead = false;
 					}
@@ -544,7 +639,20 @@
 	
 	<body onload="init(event);">
 	
-	<div id="boss" data-level="1000"><div class="box-inner"></div></div>
+	<!-- <div id="boss" data-level="1000"><div class="box-inner"></div></div> -->
+	
+	<div id="boss" data-level="2000">
+		
+		<div class="sprite"></div>
+		
+		<div class="box-inner">
+			
+			<div class="box-meter"></div>
+		
+		</div>
+	
+	</div>
+	
 	
 	<div id="info">
 		
