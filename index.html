@@ -91,6 +91,28 @@
 				text-align: right;
 			}
 			
+			#boss
+			{
+				width: 160px;
+				height: 160px;
+				
+				position: absolute;
+				
+				left: 0; right: 0; bottom: 0; top: 0;
+				
+				margin: 6% auto 0 auto;
+				
+				z-index: 1;
+				
+				background: rgb(0, 255, 10);
+				
+				-webkit-transform: translateY(-600px);
+				transform: translateY(-600px);
+				
+				-webkit-transition: -webkit-transform 1s linear;
+				transition: transform 1s linear;
+			}
+			
 		</style>
 		
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -114,6 +136,9 @@
 			var player_2 = {};
 			
 			var playerLevelSettings = {};
+			
+			var bossDefeat = 0;
+			var bossDefeatWin = 3;
 			
 			var track_draw = 0;
 			var track_win = 0;
@@ -197,13 +222,23 @@
 					enemyArray.push(E);
 				});
 				
+				var B = {};
+				
+				B._id = "boss";
+				B.level = parseInt($("#" + B._id).attr("data-level"));
+				B.alive = true;
+				B.active = true;
+				
+				$("#" + B._id).on("click", clickEvent);
+				$("#" + B._id).css("cursor", "pointer");
+					
+				enemyArray.push(B);				
+				
 				splitDifficulty();
 			}
 			
 			function splitDifficulty()
 			{
-				var allDead = true;
-				
 				for(var i in enemyArray)
 				{
 					playerLevelSort(enemyArray[i]);
@@ -235,9 +270,10 @@
 							
 						}
 						
-						allDead = false;
+						// allDead = false;
 					}
 					
+/*
 					else
 					{
 						if(enemyArray[i].active)
@@ -248,11 +284,7 @@
 							$("#" + enemyArray[i]._id).css("cursor", "default");	
 						}						
 					}
-				}
-				
-				if(allDead)
-				{
-					alert("ENTER BOSS!");
+*/
 				}
 			}
 			
@@ -345,7 +377,7 @@
 					
 					else
 					{
-						updateValue = player_w.level += Math.round(player_l.level * 0.5);	
+						updateValue = player_w.level += Math.round(player_l.level * 0.25); //0.5	
 					}
 				}
 				
@@ -395,13 +427,46 @@
 					
 					playerProgress(player_1, player_e, false);
 					
-					$("#" + player_e._id).css("opacity", 0);
+					
+					if(player_e._id === "boss")
+					{
+						if(bossDefeat < bossDefeatWin)
+						{
+							bossDefeat++;
+							
+							$("#info_p1 .boss_defeat").text(bossDefeat);
+						}
+						
+						else
+						{
+							player_e.alive = false;
+							player_e.active = false;
+									
+							$("#" + player_e._id).off("click", clickEvent);
+							$("#" + player_e._id).css("cursor", "default");
+							
+							$("#" + player_e._id).css("opacity", 0);
+							
+							alert("COMPLETED");	
+						}
+					}
+					
+					else
+					{
+						player_e.alive = false;
+						player_e.active = false;
+								
+						$("#" + player_e._id).off("click", clickEvent);
+						$("#" + player_e._id).css("cursor", "default");
+						
+						$("#" + player_e._id).css("opacity", 0);
+					}
 					
 					// $("#" + player_e._id)[0].addEventListener("webkitTransitionEnd", removeFromStage, false);
 					// $("#" + player_e._id)[0].addEventListener("transitionend", removeFromStage, false);
 					
 					
-					player_e.alive = false;
+
 					
 					playerLevelSort(player_1);
 					
@@ -438,6 +503,30 @@
 			
 			function track_plays()
 			{
+				var allDead = true;
+				
+				var boss_css;
+				
+				for(var i in enemyArray)
+				{
+					if(enemyArray[i].alive && enemyArray[i]._id !== "boss")
+					{
+						allDead = false;
+						
+						break;
+					}
+				}
+				
+				if(allDead)
+				{
+					boss_css	= 	{
+										"-webkit-transform"	: "translateY(0px)",
+										"transform"			: "translateY(0px)"
+									};
+				
+					$("#boss").css(boss_css);				
+				}
+				
 				trace("---------------------------------");
 				trace("PLAYS == " + track_play);
 				trace("DRAWS == " + track_draw);
@@ -455,17 +544,18 @@
 	
 	<body onload="init(event);">
 	
-	
+	<div id="boss" data-level="1000"><div class="box-inner"></div></div>
 	
 	<div id="info">
 		
 		<div id="info_p1">
 			
 			<p>PLAYER 1</p>
-			<p>LEVEL	: <span class="level"></span></p>
-			<p>CLASS	: <span class="class"></span></p>
-			<p>BLOW		: <span class="num"></span></p>
-			<p>RESULT	: <span class="outcome"></span></p>
+			<p>LEVEL		: <span class="level"></span></p>
+			<p>CLASS		: <span class="class"></span></p>
+			<p>BLOW			: <span class="num"></span></p>
+			<p>RESULT		: <span class="outcome"></span></p>
+			<p>BOSS DEFEAT	: <span class="boss_defeat"></span></p>
 		
 		</div>
 		
