@@ -423,29 +423,29 @@
 				if(player_ob.level >= playerLevelSettings.easy && player_ob.level < playerLevelSettings.medium)
 				{
 					player_ob.battle_class = "APPRENTICE";
-					player_ob.magic = 0;
+					player_ob.magic = 5;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.medium && player_ob.level < playerLevelSettings.high)
 				{	
 					player_ob.battle_class = "KNIGHT";
-					player_ob.magic = 15;
+					player_ob.magic = 40;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.high && player_ob.level < playerLevelSettings.max_super)
 				{		
 					player_ob.battle_class = "MASTER";
-					player_ob.magic = 35;
+					player_ob.magic = 60;
 				}
 					
 				else
 				{
 					player_ob.battle_class = "LORD";
-					player_ob.magic = 50;
+					player_ob.magic = 80;
 				}				
 			}
 			
-			function playerProgress(player_w, player_l, enemy)
+			function playerProgress(player_w, player_l, enemy, _levelDrop)
 			{
 				var updateLevel = false;
 				var updateValue;
@@ -482,6 +482,15 @@
 					
 					playerLevelSort(player_w);
 				}
+				
+				if(enemy)
+				{
+					player_l.level = _levelDrop;
+					
+					playerLevelSort(player_l);
+				}
+				
+				enemy ? updateDisplay(player_w) : updateDisplay(player_l);
 			}
 			
 			
@@ -494,15 +503,45 @@
 				track_play ++;
 				
 				
+				// IF CLASS === "MASTER && MASTER"
+				
 				if(player_1.battle_class === player_e.battle_class)
 				{
-					finalMagic = Math.floor(player_1.magic * 0.5);
+					if(player_1.level >= player_e.level)
+					{
+						// IF PLAYER_1 LEVEL IS GREATER BY 20 THEY GET FULL MAGIC
+						
+						if(Math.abs(player_1.level - player_e.level) > 20)
+						{
+							finalMagic = player_1.magic;
+						}
+						
+						// IF PLAYER_1 LEVEL IS ONLY SLIGHTLY GREATER THEY GET LESS MAGIC
+						
+						else if(Math.abs(player_1.level - player_e.level) > 10)
+						{
+							finalMagic = Math.floor(player_1.magic * 0.25);
+						}
+						
+						// FOR LESS EXPERIENCE AT THAT LEVEL
+						else
+						{
+							finalMagic = Math.floor(player_1.magic * 0.5);
+						}	
+					}
+					
+					else
+					{
+						finalMagic = Math.floor(player_1.magic * 0.5);
+					}
 				}
 				
 				else
 				{
-					finalMagic = player_1.magic;	
+					finalMagic = player_1.magic;
 				}
+				
+				
 				
 				player_1.attack = Math.floor(Math.random() * (101 - finalMagic) + finalMagic);
 				
@@ -573,7 +612,11 @@
 					status_1 = "LOSE";
 					status_2 = "WIN";
 					
-					playerProgress(player_e, player_1, true);
+					
+					var levelDrop = Math.round(Math.abs(player_1.level - player_1.level * 0.4));
+					
+					
+					playerProgress(player_e, player_1, true, levelDrop);
 					
 					playerLevelSort(player_e);
 					
