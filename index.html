@@ -52,6 +52,25 @@
 				background-size: 50px 50px;
 			}
 			
+			.box .sprite p
+			{
+				width: inherit;
+				
+				pointer-events: none;
+				
+				font-family: monospace;
+				
+				font-variant: normal;
+				
+				font-size: 12px;
+				
+				position: relative;
+				
+				padding: 5px 0 0 5px;
+				
+				color: #fff;
+			}
+			
 			.box .box-inner
 			{
 				width: inherit;
@@ -190,6 +209,171 @@
 				transition: all 1s ease-in-out;
 			}
 			
+			#finalScore
+			{
+				width: 400px;
+				
+				position: absolute;
+				
+				left: 0; top: 0; right: 0; bottom: 4%;
+				
+				margin: 30px auto 0 auto;
+			}
+			
+			#finalScore p
+			{
+				position: absolute;
+				
+				display: inline-block;
+				
+				padding: 0;
+				
+				margin: 0;
+				
+				/* width: auto; */
+				
+				/* min-width: 100px; */
+				/* max-width: inherit; */
+				
+				/* display: inline-block; */
+				/* white-space: nowrap; */
+				
+				
+				
+				left: 0;
+				top: 0;
+				
+				
+			}
+			
+			#finalScore #label_l
+			{
+				display: inline-block;
+				
+				text-align: left;
+				
+				width: auto;
+			}
+			
+			#finalScore #label_m
+			{
+				display: inline-block;
+				
+				text-align: center;
+				
+				top:0; right:0; left:0; bottom:0;
+				
+				margin: 0 auto;
+				
+				width: auto;
+			}
+			
+			#finalScore #label_w
+			{
+				display: inline-block;
+				
+				text-align: right;
+				
+				width: auto;
+				
+				right: 0;
+				top: 0;
+			}
+			
+			#finalScore #scoreMeter
+			{
+				width: 100%;
+				height: 20px;
+				
+				background: #fff;
+				
+				margin: 30px auto 0 auto;
+			}
+			
+			#finalScore #scoreMeter #scoreMeterBar
+			{
+				width: inherit;
+				height: 20px;
+				
+				background: lime;
+				
+				-webkit-transform-origin: 0% 50%;
+				transform-origin: 0% 50%;
+				
+				-webkit-transform: scaleX(0);
+				transform: scaleX(0);
+				
+				-webkit-transition: -webkit-transform 1s ease-in-out;
+				transition: transform 1s ease-in-out;
+			}
+			
+			#superPill
+			{
+				width: 20px;
+				height: 20px;
+				
+				position: absolute;
+				
+				pointer-events: auto;
+				cursor: pointer;
+				
+				top: 10px;
+				right: 10px;
+				
+				background: #fff;
+			}
+			
+			.tween-superPill
+			{
+				-webkit-animation: tweenSuperPillFrames 0.2s linear infinite;
+				animation: tweenSuperPillFrames 0.2s linear infinite;
+			}
+			
+			@-webkit-keyframes tweenSuperPillFrames
+			{
+				0%		{ opacity: 1; }
+				50%		{ opacity: 0; }
+				100%	{ opacity: 1; }
+			}
+			
+			@keyframes tweenSuperPillFrames
+			{
+				0%		{ opacity: 1; }
+				50%		{ opacity: 0; }
+				100%	{ opacity: 1; }				
+			}
+			
+			#superPill div
+			{
+				pointer-events: none;
+			}
+			
+			.pill-v
+			{
+				width: 2px;
+				height: 50%;
+				
+				background: #ff0033;
+				
+				position: absolute;
+				left: 0; right: 0; bottom: 0; top:0;
+				
+				margin: auto;
+			}
+			
+			.pill-h
+			{
+				width: 50%;
+				height: 2px;
+				
+				background: #fd054b;
+				
+				position: absolute;
+				left: 0; right: 0; bottom: 0; top:0;
+				
+				margin: auto;				
+			}
+			
 		</style>
 		
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -229,9 +413,9 @@
 				
 				playerLevelSettings = 	{
 											easy		: 0,
-											medium		: 10,
-											high		: 20,
-											max_super	: 30
+											medium		: 40,
+											high		: 80,
+											max_super	: 120
 										};
 				
 				init_player1()
@@ -270,9 +454,9 @@
 				for(var i = 0; i < 40; i++)
 				{
 					var string_id = "box" + i;
-					var string_lv = Math.floor(Math.random() * 30);
+					var string_lv = Math.floor(Math.random() * (playerLevelSettings.high - playerLevelSettings.easy) + playerLevelSettings.easy);
 					
-					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="sprite"></div><div class="box-inner"><div class="box-meter"></div></div></div>';
+					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="sprite"><p class="lv">00</p></div><div class="box-inner"><div class="box-meter"></div></div></div>';
 				
 					$("body").append(enemyHTML);
 				}
@@ -286,7 +470,10 @@
 				{
 					var _id = $(this).attr("id");
 					
-					$(this).on("click", clickEvent);
+					// $(this).on("click", clickEvent);
+					
+					$(this)[0].addEventListener("click", clickEvent, false);
+					
 					$(this).css("cursor", "pointer");
 					
 					var E = {};
@@ -295,6 +482,8 @@
 					E.level = parseInt($("#" + E._id).attr("data-level"));
 					E.alive = true;
 					E.active = true;
+					
+					$("#" + E._id + " .lv").text(E.level);
 					
 					enemyArray.push(E);
 				});
@@ -306,13 +495,28 @@
 				B.alive = true;
 				B.active = true;
 				
-				$("#" + B._id).on("click", clickEvent);
+				// $("#" + B._id).on("click", clickEvent);
+				
+				$("#" + B._id)[0].addEventListener("click", clickEvent, false);
+				
 				$("#" + B._id).css("cursor", "pointer");
+				
+				$("#" + B._id + " .lv").text(B.level);
 					
 				enemyArray.push(B);				
 				
 				splitDifficulty();
+				
+				$("#superPill")[0].addEventListener("click", superPillEat, false);
 			}
+			
+			function superPillEat(event)
+			{
+				player_1.level += 100;
+				
+				updateDisplay(enemyArray[0]);
+			}
+			
 			
 			function splitDifficulty()
 			{
@@ -423,29 +627,33 @@
 				if(player_ob.level >= playerLevelSettings.easy && player_ob.level < playerLevelSettings.medium)
 				{
 					player_ob.battle_class = "APPRENTICE";
+					player_ob.fullStrike = 51;
 					player_ob.magic = 5;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.medium && player_ob.level < playerLevelSettings.high)
 				{	
 					player_ob.battle_class = "KNIGHT";
+					player_ob.fullStrike = 71;
 					player_ob.magic = 40;
 				}
 					
 				else if(player_ob.level >= playerLevelSettings.high && player_ob.level < playerLevelSettings.max_super)
 				{		
 					player_ob.battle_class = "MASTER";
+					player_ob.fullStrike = 91;
 					player_ob.magic = 60;
 				}
 					
 				else
 				{
 					player_ob.battle_class = "LORD";
+					player_ob.fullStrike = 101;
 					player_ob.magic = 80;
 				}				
 			}
 			
-			function playerProgress(player_w, player_l, enemy, _levelDrop)
+			function playerProgress(player_w, player_l, enemy)
 			{
 				var updateLevel = false;
 				var updateValue;
@@ -485,10 +693,17 @@
 				
 				if(enemy)
 				{
+					$("#" + player_w._id + " .lv").text(player_w.level);
+				}
+				
+/*
+				if(enemy)
+				{
 					player_l.level = _levelDrop;
 					
 					playerLevelSort(player_l);
 				}
+*/
 				
 				enemy ? updateDisplay(player_w) : updateDisplay(player_l);
 			}
@@ -543,9 +758,9 @@
 				
 				
 				
-				player_1.attack = Math.floor(Math.random() * (101 - finalMagic) + finalMagic);
+				player_1.attack = Math.floor(Math.random() * (player_1.fullStrike - finalMagic) + finalMagic);
 				
-				player_e.attack = Math.floor(Math.random() * (101 - player_e.magic) + player_e.magic);
+				player_e.attack = Math.floor(Math.random() * (player_e.fullStrike - player_e.magic) + player_e.magic);
 				
 				if(player_1.attack === player_e.attack)
 				{
@@ -576,12 +791,28 @@
 							player_e.alive = false;
 							player_e.active = false;
 									
-							$("#" + player_e._id).off("click", clickEvent);
+							// $("#" + player_e._id).off("click", clickEvent);
+							
+							$("#" + player_e._id)[0].removeEventListener("click", clickEvent, false);
+							
 							$("#" + player_e._id).css("cursor", "default");
 							
 							$("#" + player_e._id).css("opacity", 0);
 							
-							alert("COMPLETED");	
+							alert("COMPLETED " + "win rate == " + Math.round((track_win / track_play) * 100) + "%");
+							
+/*
+							var bar_css;
+							
+							var bar_scale =  Math.round((track_win / track_play) * 100) * 0.01;
+							
+							bar_css = 	{
+											"-webkit-transform"	: "scaleX(" + bar_scale + ")",
+											"transform"			: "scaleX(" + bar_scale + ")"
+										};
+							
+							$("#finalScore #scoreMeter #scoreMeterBar").css(bar_css);
+*/	
 						}
 					}
 					
@@ -590,7 +821,10 @@
 						player_e.alive = false;
 						player_e.active = false;
 								
-						$("#" + player_e._id).off("click", clickEvent);
+						// $("#" + player_e._id).off("click", clickEvent);
+						
+						$("#" + player_e._id)[0].removeEventListener("click", clickEvent, false);
+						
 						$("#" + player_e._id).css("cursor", "default");
 						
 						$("#" + player_e._id).css("opacity", 0);
@@ -628,6 +862,8 @@
 				$("#info_p1 .outcome").text(status_1);
 				$("#info_p2 .outcome").text(status_2);
 				
+				track_rating();
+				
 				track_plays();
 			}
 			
@@ -637,6 +873,20 @@
 				$("#" + event.target.id)[0].addEventListener("transitionend", removeFromStage, false);
 			
 				$("#" + event.target.id).remove();
+			}
+			
+			function track_rating()
+			{
+				var bar_css;
+							
+				var bar_scale =  Math.round((track_win / track_play) * 100) * 0.01;
+							
+				bar_css = 	{
+								"-webkit-transform"	: "scaleX(" + bar_scale + ")",
+								"transform"			: "scaleX(" + bar_scale + ")"
+							};
+							
+				$("#finalScore #scoreMeter #scoreMeterBar").css(bar_css);				
 			}
 			
 			function track_plays()
@@ -684,6 +934,14 @@
 	
 	<!-- <div id="boss" data-level="1000"><div class="box-inner"></div></div> -->
 	
+	
+	<div id="superPill" class="tween-superPill">
+		
+		<div class="pill-v"></div>
+		<div class="pill-h"></div>
+		
+	</div>
+	
 	<div id="boss" data-level="2000">
 		
 		<div class="sprite"></div>
@@ -718,6 +976,20 @@
 			<p>BLOW		: <span class="num"></span></p>
 			<p>RESULT	: <span class="outcome"></span></p>
 		
+		</div>
+		
+		<div id="finalScore">
+		
+			<p id="label_l">GOAT CURRY</p>
+			<p id="label_m">GOAT HERDER</p>
+			<p id="label_w">GOAT DEMON</p>
+			
+			<div id="scoreMeter">
+				
+				<div id="scoreMeterBar"></div>
+				
+			</div>
+			
 		</div>
 		
 	</div>
