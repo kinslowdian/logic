@@ -374,6 +374,57 @@
 				margin: auto;				
 			}
 			
+			.num-plug
+			{
+				width: 30px;
+				height: 30px;
+				
+				position: absolute;
+				
+				background: white;
+				
+				-webkit-border-radius: 15px;
+				border-radius: 15px; 
+			}
+			
+			.num-plug p
+			{
+				pointer-events: none;
+				-webkit-user-select: none;
+				user-select: none;
+				
+				position: absolute;
+				
+				width: inherit;
+				height: 16px;
+				
+				text-align: center;
+				
+				display: inline-block;
+				
+				top: 0; left: 0; right: 0; bottom: 0;
+				
+				margin: auto;
+				
+				font-family: sans-serif;
+				font-weight: bold;
+				
+				color: #ff0033;
+			}
+			
+			#level1
+			{
+				top: 50px;
+				right: 10px;
+			}
+			
+			#level2
+			{
+				top: 90px;
+				right: 10px;
+			}
+			
+			
 		</style>
 		
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
@@ -396,16 +447,33 @@
 		
 	</div>
 	
-	<div id="boss" data-level="2000">
+	<div id="level1" class="num-plug">
 		
-		<div class="sprite"></div>
+		<p>1</p>
 		
-		<div class="box-inner">
-			
-			<div class="box-meter"></div>
-		
-		</div>
+	</div>
 	
+	<div id="level2" class="num-plug">
+		
+		<p>2</p>
+		
+	</div>
+	
+	
+	<div id="stage">
+		
+		<div id="boss" data-level="2000">
+			
+			<div class="sprite"></div>
+			
+			<div class="box-inner">
+				
+				<div class="box-meter"></div>
+			
+			</div>
+		
+		</div>		
+		
 	</div>
 	
 	

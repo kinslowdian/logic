@@ -10,6 +10,14 @@
 			var bossDefeat = 0;
 			var bossDefeatWin = 3;
 			
+			
+			var level_0_data;
+			var level_1_data;
+			
+			var GAME_LEVEL = 0;
+			
+			var bossSet = false;
+			
 			function init(event)
 			{
 				trace(event);
@@ -26,9 +34,20 @@
 										};
 */
 				
+				buildData();
+				
 				init_player1()
 				
 				populate();
+			}
+			
+			function buildData()
+			{
+				level_0_data = new Array();
+				level_1_data = new Array();
+				
+				level_0_data = [0, 4, 6, 2, 8, 10, 22, 12, 33, 97, 17, 18];
+				level_1_data = [100, 22, 24, 23, 29, 28, 10, 16, 26, 44, 98, 97, 96, 95];
 			}
 			
 			function init_player1()
@@ -52,12 +71,37 @@
 			{
 				var l = 0;
 				
-				for(var i = 0; i < 40; i++)
+				var rewrite = false;
+				
+				var levelData = window["level_" + GAME_LEVEL + "_data"];
+				
+				trace("populate();");
+				trace(levelData);
+				
+				for(var i = 0; i < levelData.length; i++)
 				{
-					var string_id = "box" + i;
+					var string_id = "box_" + GAME_LEVEL + "_" + i;
 					//var string_lv = Math.floor(Math.random() * (playerLevelSettings.high - playerLevelSettings.easy) + playerLevelSettings.easy);
 					
-					var string_lv = Math.floor((i * 2) * 0.5);
+					var string_lv = 0;
+					var writeObject;
+					
+					for(var j in enemyArray)
+					{
+						if(enemyArray[j]._id === string_id)
+						{
+							rewrite = true;
+							
+							writeObject = enemyArray[j];
+							
+							break;
+						}
+					}
+					
+					rewrite ? string_lv = writeObject.level : string_lv = levelData[i];
+					
+					
+					
 					
 					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="sprite"><p class="lv">00</p></div><div class="box-inner"><div class="box-meter"></div></div></div>';
 				
@@ -73,40 +117,63 @@
 				{
 					var _id = $(this).attr("id");
 					
+					var rewrite = false;
+					
 					// $(this).on("click", clickEvent);
 					
 					$(this)[0].addEventListener("click", clickEvent, false);
 					
 					$(this).css("cursor", "pointer");
 					
-					var E = {};
+					for(var j in enemyArray)
+					{
+						if(enemyArray[j]._id === _id)
+						{
+							rewrite = true;
+							
+							break;
+						}
+					}
 					
-					E._id = _id;
-					E.level = parseInt($("#" + E._id).attr("data-level"));
-					E.alive = true;
-					E.active = true;
 					
-					$("#" + E._id + " .lv").text(E.level);
-					
-					enemyArray.push(E);
+					if(!rewrite)
+					{
+						var E = {};
+						
+						E._id = _id;
+						E.level = parseInt($("#" + E._id).attr("data-level"));
+						E.alive = true;
+						E.active = true;
+						E.area = GAME_LEVEL;
+						
+						$("#" + E._id + " .lv").text(E.level);
+						
+						enemyArray.push(E);
+					}
 				});
 				
-				var B = {};
 				
-				B._id = "boss";
-				B.level = parseInt($("#" + B._id).attr("data-level"));
-				B.alive = true;
-				B.active = true;
+				if(!bossSet)
+				{
+					bossSet = true;
 				
-				// $("#" + B._id).on("click", clickEvent);
+					var B = {};
 				
-				$("#" + B._id)[0].addEventListener("click", clickEvent, false);
-				
-				$("#" + B._id).css("cursor", "pointer");
-				
-				$("#" + B._id + " .lv").text(B.level);
+					B._id = "boss";
+					B.level = parseInt($("#" + B._id).attr("data-level"));
+					B.alive = true;
+					B.active = true;
 					
-				enemyArray.push(B);				
+					// $("#" + B._id).on("click", clickEvent);
+					
+					$("#" + B._id)[0].addEventListener("click", clickEvent, false);
+					
+					$("#" + B._id).css("cursor", "pointer");
+					
+					$("#" + B._id + " .lv").text(B.level);
+						
+					enemyArray.push(B);	
+				}			
 				
 				splitDifficulty();
 				
@@ -120,75 +187,53 @@
 				updateDisplay(enemyArray[0]);
 			}
 			
-			
 			function splitDifficulty()
 			{
 				for(var i in enemyArray)
 				{
 					battleEngine.playerLevelSort(enemyArray[i]);
 					
-					var meter_css;
-					var meter_scale;
-					
-					if(enemyArray[i].alive)
-					{
-						if(enemyArray[i].battle_class === "APPRENTICE")
-						{
-							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.25);
-							
-							meter_scale = 0.25;
-						}
-						
-						else if(enemyArray[i].battle_class === "KNIGHT")
-						{
-							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.5);
-							
-							meter_scale = 0.5;
-						}
-						
-						else if(enemyArray[i].battle_class === "MASTER")
-						{
-							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 0.75);
-							
-							meter_scale = 0.75;
-						}
-						
-						else if(enemyArray[i].battle_class === "LORD")
-						{
-							// $("#" + enemyArray[i]._id + " .box-inner").css("opacity", 1);
-							
-							meter_scale = 1;
-						}
-						
-						else
-						{
-							
-						}
-						
-						meter_css = {
-										"-webkit-transform"	: "scaleX(" + meter_scale + ")",
-										"transform"			: "scaleX(" + meter_scale + ")"
-									};
-						
-						$("#" + enemyArray[i]._id + " .box-inner .box-meter").css(meter_css);
-						
-						// allDead = false;
-					}
-					
-/*
-					else
-					{
-						if(enemyArray[i].active)
-						{
-							enemyArray[i].active = false;
-							
-							$("#" + enemyArray[i]._id).off("click", clickEvent);
-							$("#" + enemyArray[i]._id).css("cursor", "default");	
-						}						
-					}
-*/
+					showEnemyPower(enemyArray[i]);
 				}
 			}
+			
+			
+			function showEnemyPower(player_e)
+			{
+				var meter_css;
+				var meter_scale;
+				
+				if(player_e.alive)
+				{
+					if(player_e.battle_class === "APPRENTICE")
+					{
+						meter_scale = 0.25;
+					}
+						
+					else if(player_e.battle_class === "KNIGHT")
+					{
+						meter_scale = 0.5;
+					}
+						
+					else if(player_e.battle_class === "MASTER")
+					{		
+						meter_scale = 0.75;
+					}
+						
+					else if(player_e.battle_class === "LORD")
+					{
+						meter_scale = 1;
+					}
+					
+					meter_css = {
+									"-webkit-transform"	: "scaleX(" + meter_scale + ")",
+									"transform"			: "scaleX(" + meter_scale + ")"
+								};
+						
+					$("#" + player_e._id + " .box-inner .box-meter").css(meter_css);					
+				}
+			}			
+
 			
 			function clickEvent(event)
 			{
@@ -211,7 +256,39 @@
 				trace(result);
 				trace(battleEngine);
 				
-				// updateDisplay(player_e)
+				switch(result.status_player)
+				{
+					case "WIN":
+					{
+						$("#" + player_e._id).css("opacity", 0);
+						
+						break;
+					}
+					
+					case "DRAW":
+					{
+						
+						break;
+					}
+					
+					case "LOSE":
+					{
+						// battleEngine.playerLevelSort(player_e);
+							
+						showEnemyPower(player_e);
+						
+						break;
+					}
+					
+					default:
+					{
+						trace("OBJECT RETURN FAULT");
+					}
+				}
+				
+				updateDisplay(player_e);
+				
+				track_rating();
 			}
 			
 			
@@ -226,4 +303,18 @@
 				$("#info_p1 .num").text(player_1.attack);
 				$("#info_p2 .num").text(player_e.attack);
 			
+			}
+			
+			function track_rating()
+			{
+				var bar_css;
+							
+				var bar_scale =  Math.round((battleEngine.track_win / battleEngine.track_play) * 100) * 0.01;
+							
+				bar_css = 	{
+								"-webkit-transform"	: "scaleX(" + bar_scale + ")",
+								"transform"			: "scaleX(" + bar_scale + ")"
+							};
+							
+				$("#finalScore #scoreMeter #scoreMeterBar").css(bar_css);				
 			}
