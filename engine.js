@@ -161,7 +161,7 @@ var battleEngine = 	{
 								
 								if(boss)
 								{
-									
+									alert("BOSS LOSE");
 								}
 								
 								else

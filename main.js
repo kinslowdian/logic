@@ -18,6 +18,8 @@
 			
 			var bossSet = false;
 			
+			var rom = {};
+			
 			function init(event)
 			{
 				trace(event);
@@ -34,9 +36,69 @@
 										};
 */
 				
+				rom.levels = 3;
+				rom.completed = new Array();
+				
+				for(var i = 0; i < rom.levels; i++)
+				{
+					rom.completed.push(false);
+				}
+				
 				buildData();
 				
 				init_player1()
+				
+				populate();
+				
+				$(".num-plug").each(function(i)
+				{
+					$(this)[0].addEventListener("click", changeLevel, false);
+				});
+			}
+			
+			function changeLevel(event)
+			{
+				var _id = event.target.id;
+				
+				var level_cur = GAME_LEVEL;
+				
+				var level_new;
+				
+				switch(_id)
+				{
+					case "level1":
+					{
+						level_new = 0;
+						
+						break;
+					}
+					
+					case "level2":
+					{
+						level_new = 1;
+						
+						break;
+					}
+					
+					case "level3":
+					{
+						level_new = 2;
+						
+						break;
+					}
+				}
+				
+				if(GAME_LEVEL != level_new)
+				{
+					GAME_LEVEL = level_new;
+					
+					clearLevel();	
+				}
+			}
+			
+			function clearLevel()
+			{
+				$("#stage #pilgrims").html("");
 				
 				populate();
 			}
@@ -48,6 +110,7 @@
 				
 				level_0_data = [0, 4, 6, 2, 8, 10, 22, 12, 33, 97, 17, 18];
 				level_1_data = [100, 22, 24, 23, 29, 28, 10, 16, 26, 44, 98, 97, 96, 95];
+				level_2_data = [300, 21, 22, 23, 24, 100, 94, 98];
 			}
 			
 			function init_player1()
@@ -105,7 +168,7 @@
 					
 					var enemyHTML = '<div id="' + string_id + '" class="box" data-level="' + string_lv + '"><div class="sprite"><p class="lv">00</p></div><div class="box-inner"><div class="box-meter"></div></div></div>';
 				
-					$("body").append(enemyHTML);
+					$("#stage #pilgrims").append(enemyHTML);
 				}
 			
 				setup();
@@ -178,6 +241,36 @@
 				splitDifficulty();
 				
 				$("#superPill")[0].addEventListener("click", superPillEat, false);
+				
+				checkAliveInit();
+			}
+			
+			function checkAliveInit()
+			{
+				for(var i in enemyArray)
+				{
+					if(enemyArray[i].area === GAME_LEVEL)
+					{
+						checkAlive(enemyArray[i]);
+					}
+				}
+			}
+			
+			function checkAlive(player_e)
+			{
+				var kill_css;
+				
+				if(!player_e.alive || !player_e.active)
+				{
+					kill_css = 	{
+									"opacity" : 0,
+									"cursor" : "auto"
+								};
+					
+					$("#" + player_e._id).css(kill_css);
+					
+					$("#" + player_e._id)[0].removeEventListener("click", clickEvent, false);
+				}
 			}
 			
 			function superPillEat(event)
@@ -253,14 +346,16 @@
 			{
 				var result = battleEngine.battle(player_1, player_e, false);
 				
-				trace(result);
-				trace(battleEngine);
+				// trace(result);
+				// trace(battleEngine);
 				
 				switch(result.status_player)
 				{
 					case "WIN":
 					{
 						$("#" + player_e._id).css("opacity", 0);
+						
+						checkEnemyDeaths();
 						
 						break;
 					}
@@ -289,6 +384,64 @@
 				updateDisplay(player_e);
 				
 				track_rating();
+				
+				
+			}
+			
+			function checkEnemyDeaths()
+			{
+				var enemy_level_dead = true;
+				var enemy_game_dead = true;
+				
+				for(var i in enemyArray)
+				{
+					if(enemyArray[i]._id != "boss")
+					{
+						if(enemyArray[i].area === GAME_LEVEL)
+						{
+							if(enemyArray[i].alive || enemyArray[i].active)
+							{
+								enemy_level_dead = false;
+							
+								break;
+							}
+						}
+					}
+				}
+				
+				if(enemy_level_dead)
+				{
+					rom.completed[GAME_LEVEL] = true;
+					
+					for(var j in rom.completed)
+					{
+						if(!rom.completed[j])
+						{
+							enemy_game_dead = false;
+						}
+					}
+					
+					if(enemy_game_dead)
+					{
+						// alert("BRING IN BOSS");
+					
+						bossTime();
+					}
+				}
+				
+				trace(rom.completed);
+			}
+			
+			function bossTime()
+			{
+				var boss_css;
+				
+				boss_css	= 	{
+									"-webkit-transform"	: "translateY(0px)",
+									"transform"			: "translateY(0px)"
+								};
+				
+				$("#boss").css(boss_css);
 			}
 			
 			
