@@ -20,11 +20,13 @@
 			
 			var rom = {};
 			
+			var finalBattle = false;
+			
 			function init(event)
 			{
 				trace(event);
 				
-				battleEngine.init(0, 40, 80, 120);
+				battleEngine.init(3, 0, 40, 80, 120, 3);
 				
 				
 /*
@@ -209,11 +211,21 @@
 						E.active = true;
 						E.area = GAME_LEVEL;
 						
-						$("#" + E._id + " .lv").text(E.level);
+						// $("#" + E._id + " .lv").text(E.level);
 						
 						enemyArray.push(E);
 					}
 				});
+				
+				// level display on characters
+				
+				for(var i in enemyArray)
+				{
+					if(enemyArray[i].area === GAME_LEVEL)
+					{
+						$("#" + enemyArray[i]._id + " .lv").text(enemyArray[i].level);
+					}
+				}
 				
 				
 				if(!bossSet)
@@ -276,6 +288,8 @@
 			function superPillEat(event)
 			{
 				player_1.level += 100;
+				
+				battleEngine.playerLevelSort(player_1);
 				
 				updateDisplay(enemyArray[0]);
 			}
@@ -344,7 +358,11 @@
 			
 			function sortEnemy(player_e)
 			{
-				var result = battleEngine.battle(player_1, player_e, false);
+				// var result = battleEngine.battle(player_1, player_e, false);
+				
+				var result;
+				
+				finalBattle ? result = battleEngine.battle(player_1, player_e, true) : result = battleEngine.battle(player_1, player_e, false);
 				
 				// trace(result);
 				// trace(battleEngine);
@@ -353,9 +371,27 @@
 				{
 					case "WIN":
 					{
-						$("#" + player_e._id).css("opacity", 0);
+						if(player_e._id !== "boss")
+						{
+							$("#" + player_e._id).css("opacity", 0);	
+							
+							// checkEnemyDeaths();
 						
-						checkEnemyDeaths();
+							checkEnemyDeathsBasic();
+						}
+						
+						if(player_e._id === "boss")
+						{
+								
+						}
+						
+						if(battleEngine.battlesComplete)
+						{
+							$("#" + player_e._id).css("opacity", 0);
+							
+							alert("COMPLETE");
+						}
+						
 						
 						break;
 					}
@@ -372,6 +408,8 @@
 							
 						showEnemyPower(player_e);
 						
+						$("#" + player_e._id + " .lv").text(player_e.level);
+						
 						break;
 					}
 					
@@ -386,6 +424,45 @@
 				track_rating();
 				
 				
+			}
+			
+			function checkEnemyDeathsBasic()
+			{
+				var allDead = battleEngine.enemyAllDeadCheck(enemyArray, "boss", GAME_LEVEL);
+				
+				trace("!!!! allDead object >");
+				trace(allDead);
+
+				if(allDead.enemy_level_dead)
+				{
+					// alert("LEVEL CLEARED");
+				}
+				
+				
+				if(allDead.enemy_game_dead)
+				{
+					// alert("BOSS PREP");
+					
+					if(!finalBattle)
+					{
+						finalBattle = true;
+							
+						bossTime();	
+					}	
+				}
+
+
+/*
+				if(allDead)
+				{
+					if(!finalBattle)
+					{
+						finalBattle = true;
+							
+						bossTime();	
+					}					
+				}
+*/
 			}
 			
 			function checkEnemyDeaths()
@@ -425,7 +502,12 @@
 					{
 						// alert("BRING IN BOSS");
 					
-						bossTime();
+						if(!finalBattle)
+						{
+							finalBattle = true;
+							
+							bossTime();	
+						}
 					}
 				}
 				

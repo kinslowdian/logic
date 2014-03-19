@@ -6,17 +6,32 @@ var battleEngine = 	{
 						
 						playerLevelSettings : null,
 						
-						init : function(e, m, h, s)
+						bossBattleRound : 0,
+						bossBattleRoundMax : 0,
+						
+						battlesComplete : false,
+						
+						areasClearedStatus : null,
+						
+						init : function(areas, e, m, h, s, rounds)
 						{
 							this.playerLevelSettings = {};
 							
 							this.playerLevelSettings = {
-															easy		: 0,
-															medium		: 40,
-															high		: 80,
-															max_super	: 120
+															easy		: e,
+															medium		: m,
+															high		: h,
+															max_super	: s
 														};
 							
+							this.areasClearedStatus = new Array();
+							
+							for(var i = 0; i < areas; i++)
+							{
+								this.areasClearedStatus.push(false);
+							}
+							
+							this.bossBattleRoundMax = rounds;
 						},
 						
 						playerLevelSort : function(player_ob)
@@ -161,7 +176,23 @@ var battleEngine = 	{
 								
 								if(boss)
 								{
-									alert("BOSS LOSE");
+									if(this.bossBattleRound < this.bossBattleRoundMax)
+									{
+										this.bossBattleRound++;
+										
+										alert("BOSS LOSE " + this.bossBattleRound);
+									}
+									
+									if(this.bossBattleRound === this.bossBattleRoundMax)
+									{
+										// alert("BOSS FULLY LOSE");
+										
+										enemy_ob.alive = false;
+										enemy_ob.active = false;
+										
+										this.battlesComplete = true;										
+									}
+									
 								}
 								
 								else
@@ -195,20 +226,53 @@ var battleEngine = 	{
 							return battleData;
 						},
 						
-						enemyAllDeadCheck : function(checkArray)
+						enemyAllDeadCheck : function(checkArray, ignore_id, area)
 						{
-							var enemyAllDead = true;
+							var deathData = {};
+							
+							deathData.enemy_level_dead = true;
+							deathData.enemy_game_dead = true;
+							
 							
 							for(var i in checkArray)
 							{
-								if(checkArray[i].alive)
+								if(checkArray[i]._id != ignore_id)
 								{
-									enemyAllDead = false;
-									
-									break;
+									if(enemyArray[i].area === area)
+									{
+										if(checkArray[i].alive || checkArray[i].active)
+										{
+											deathData.enemy_level_dead = false;
+											
+											break;
+										}
+									}	
 								}
 							}
 							
-							return enemyAllDead;
+							trace(this.areasClearedStatus);
+							trace(deathData.enemy_level_dead);
+							
+							if(deathData.enemy_level_dead)
+							{
+								this.areasClearedStatus[area] = true;
+								
+								for(var j in this.areasClearedStatus)
+								{
+									if(!this.areasClearedStatus[j])
+									{
+										deathData.enemy_game_dead = false;
+									
+										break;
+									}
+								} 
+							}
+							
+							else
+							{
+								deathData.enemy_game_dead = false;
+							}
+							
+							return deathData;
 						}
 					};
